@@ -1,0 +1,29 @@
+#! /bin/bash
+#
+# This script is expected to be run as root
+set -e
+set -x
+
+scratch="$(mktemp -d)"
+TMPDIR="$scratch"
+cleanup() {
+  [[ -d "$scratch" ]] && rm -rf "$scratch"
+}
+trap cleanup EXIT
+
+# Ansible
+apt-get update
+apt-get -y install software-properties-common
+apt-add-repository -y ppa:ansible/ansible
+apt-get update
+apt-get -y install ansible
+
+# Bundler
+gem install bundler --no-ri --no-rdoc
+gem list
+
+# Puppet
+(cd "$scratch";
+ wget https://apt.puppetlabs.com/puppetlabs-release-pc1-xenial.deb;
+ dpkg -i puppetlabs-release-pc1-xenial.deb;
+ apt update;)
